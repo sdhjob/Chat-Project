@@ -3,6 +3,7 @@ package org.jasoet.chat.model;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.jasoet.chat.util.EncriptionUtil;
 
 public class User {
 
@@ -23,11 +24,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        try {
-            this.password = User.md5(password);
-        } catch (NoSuchAlgorithmException ex) {
-            System.err.println("Fatal Error, Encription Failed");
-        }
+        this.password = EncriptionUtil.MD5MySQL(password);
     }
 
     public String getUsername() {
@@ -36,19 +33,5 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public static String md5(String input) throws NoSuchAlgorithmException {
-        String result = input;
-        if (input != null) {
-            MessageDigest md = MessageDigest.getInstance("MD5"); //or "SHA-1"
-            md.update(input.getBytes());
-            BigInteger hash = new BigInteger(1, md.digest());
-            result = hash.toString(16);
-            if ((result.length() % 2) != 0) {
-                result = "0" + result;
-            }
-        }
-        return result;
     }
 }

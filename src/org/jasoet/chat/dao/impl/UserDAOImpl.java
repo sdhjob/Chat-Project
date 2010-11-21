@@ -36,20 +36,19 @@ public class UserDAOImpl implements UserDAO {
 
     }
 
-    public List<User> getByUsername(String username) throws SQLException {
+    public User getByUsername(String username) throws SQLException {
         String sql = "SELECT o.id,o.username,o.password FROM users o WHERE o.username = ?";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, username);
 
         ResultSet rs = ps.executeQuery();
-        List<User> data = new ArrayList<User>();
+        User data = null;
 
-        while (rs.next()) {
-            User d = new User();
-            d.setId(rs.getInt("id"));
-            d.setUsername(rs.getString("username"));
-            d.setPassword(rs.getString("password"));
-            data.add(d);
+        if (rs.next()) {
+            data = new User();
+            data.setId(rs.getInt("id"));
+            data.setUsername(rs.getString("username"));
+            data.setPassword(rs.getString("password"));
         }
 
         return data;
@@ -77,5 +76,20 @@ public class UserDAOImpl implements UserDAO {
         ps.setString(2, newUser.getPassword());
         ps.setInt(3, id);
         return ps.executeUpdate();
+    }
+
+    public boolean isAuthenticate(String username, String password) throws SQLException {
+        User u = this.getByUsername(username);
+
+        if (u == null) {
+            return false;
+        }
+
+        if (password.equals(u.getPassword())) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }

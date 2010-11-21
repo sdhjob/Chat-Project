@@ -16,11 +16,13 @@ public interface UserDAO {
 
     public List<User> getAll() throws SQLException;
 
-    public List<User> getByUsername(String username) throws SQLException;
+    public User getByUsername(String username) throws SQLException;
 
     public int insert(User d) throws SQLException;
 
     public int delete(int id) throws SQLException;
 
     public int update(int id, User newUser) throws SQLException;
+
+    public boolean isAuthenticate(String username, String password) throws SQLException;
 }
