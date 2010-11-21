@@ -1,6 +1,18 @@
 package org.jasoet.chat.server;
 
+import java.net.InetSocketAddress;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.AbstractListModel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
+import org.apache.mina.filter.logging.LoggingFilter;
+import org.apache.mina.filter.logging.MdcInjectionFilter;
+import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
 /**
  *
@@ -8,9 +20,35 @@ import java.util.Set;
  */
 public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
 
+    private static final int PORT = 1234;
+    private NioSocketAcceptor acceptor;
+    private ChatProtocolHandler handler;
+
     /** Creates new form ServerFrame */
     public ServerFrame() {
         initComponents();
+    }
+
+    private void connecting() {
+        try {
+            acceptor = new NioSocketAcceptor();
+            DefaultIoFilterChainBuilder chain = acceptor.getFilterChain();
+            MdcInjectionFilter mdcInjectionFilter = new MdcInjectionFilter();
+            chain.addLast("mdc", mdcInjectionFilter);
+            chain.addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory()));
+            addLogger(chain);
+            // Bind
+            handler = new ChatProtocolHandler(this);
+            acceptor.setHandler(handler);
+            acceptor.bind(new InetSocketAddress(PORT));
+            messageReceived("Connected");
+            messageReceived("Listening on port " + PORT);
+
+
+
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
     }
 
     /** This method is called from within the constructor to
@@ -216,17 +254,41 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-        // TODO add your handling code here:
+        connecting();
+
+        connectButton.setEnabled(!acceptor.isActive());
+        disconnectButton.setEnabled(acceptor.isActive());
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
-        // TODO add your handling code here:
+        acceptor.unbind(new InetSocketAddress(PORT));
+        acceptor.dispose();
+
+        connectButton.setEnabled(!acceptor.isActive());
+        disconnectButton.setEnabled(acceptor.isActive());
+        messageReceived("Disconected");
     }//GEN-LAST:event_disconnectButtonActionPerformed
+
+    private static void addLogger(DefaultIoFilterChainBuilder chain)
+            throws Exception {
+        chain.addLast("logger", new LoggingFilter());
+    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ServerFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(ServerFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ServerFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(ServerFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -258,24 +320,34 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
     private javax.swing.JScrollPane usersScrollPane;
     // End of variables declaration//GEN-END:variables
 
-    public void setUsers(Set<String> users) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setUsers(final Set<String> users) {
+        this.usersList.setModel(new AbstractListModel() {
+
+            public int getSize() {
+                return users.size();
+            }
+
+            public Object getElementAt(int i) {
+                return users.toArray()[i];
+            }
+        });
     }
 
     public void connected() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        connectButton.setEnabled(!acceptor.isActive());
+        disconnectButton.setEnabled(acceptor.isActive());
     }
 
     public void disconnected() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        connectButton.setEnabled(!acceptor.isActive());
+        disconnectButton.setEnabled(acceptor.isActive());
     }
 
     public void messageReceived(String message) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        messagesTextArea.append(message + "\n");
     }
 
     public void error(String message) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        messagesTextArea.append("ERRORR : " + message + "\n");
     }
-
 }

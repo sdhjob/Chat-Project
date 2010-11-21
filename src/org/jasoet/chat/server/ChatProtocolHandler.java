@@ -1,25 +1,5 @@
-/*
- *  Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- *
- */
 package org.jasoet.chat.server;
 
-import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.logging.MdcInjectionFilter;
@@ -30,24 +10,22 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * {@link IoHandler} implementation of a simple chat server protocol.
- *
- * @author <a href="http://mina.apache.org">Apache MINA Project</a>
- */
 public class ChatProtocolHandler extends IoHandlerAdapter {
+
+    private ServerCallback callback;
     private final static Logger LOGGER = LoggerFactory.getLogger(ChatProtocolHandler.class);
+    private final Set<IoSession> sessions = Collections.synchronizedSet(new HashSet<IoSession>());
+    private final Set<String> users = Collections.synchronizedSet(new HashSet<String>());
 
-    private final Set<IoSession> sessions = Collections
-            .synchronizedSet(new HashSet<IoSession>());
-
-    private final Set<String> users = Collections
-            .synchronizedSet(new HashSet<String>());
+    public ChatProtocolHandler(ServerCallback callback) {
+        this.callback = callback;
+    }
 
     @Override
     public void exceptionCaught(IoSession session, Throwable cause) {
         LOGGER.warn("Unexpected exception.", cause);
         // Close connection when unexpected exception is caught.
+        callback.error("Unexpected exception." + cause.getMessage());
         session.close(true);
     }
 
@@ -100,6 +78,8 @@ public class ChatProtocolHandler extends IoHandlerAdapter {
                     users.add(user);
                     session.write("LOGIN OK");
                     broadcast("The user " + user + " has joined the chat session.");
+
+                    callback.setUsers(users);
                     break;
 
                 case ChatCommand.BROADCAST:
@@ -120,6 +100,7 @@ public class ChatProtocolHandler extends IoHandlerAdapter {
 
     public void broadcast(String message) {
         synchronized (sessions) {
+            callback.messageReceived(message);
             for (IoSession session : sessions) {
                 if (session.isConnected()) {
                     session.write("BROADCAST OK " + message);
@@ -134,6 +115,7 @@ public class ChatProtocolHandler extends IoHandlerAdapter {
         users.remove(user);
         sessions.remove(session);
         broadcast("The user " + user + " has left the chat session.");
+        callback.setUsers(users);
     }
 
     public boolean isChatUser(String name) {
@@ -152,6 +134,7 @@ public class ChatProtocolHandler extends IoHandlerAdapter {
                     break;
                 }
             }
+            callback.messageReceived("KICKED : " + name);
         }
     }
 }
