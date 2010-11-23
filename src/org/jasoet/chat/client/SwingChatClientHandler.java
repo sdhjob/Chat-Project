@@ -1,14 +1,16 @@
- 
 package org.jasoet.chat.client;
 
-import org.apache.mina.core.service.IoHandler;
+import java.util.List;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.jasoet.chat.server.ChatCommand;
- 
+
 public class SwingChatClientHandler extends IoHandlerAdapter {
 
     public interface Callback {
+
+        void users(List<String> users);
+
         void connected();
 
         void loggedIn();
@@ -21,7 +23,6 @@ public class SwingChatClientHandler extends IoHandlerAdapter {
 
         void error(String message);
     }
-
     private final Callback callback;
 
     public SwingChatClientHandler(Callback callback) {
@@ -46,18 +47,21 @@ public class SwingChatClientHandler extends IoHandlerAdapter {
 
             switch (command.toInt()) {
 
-            case ChatCommand.BROADCAST:
-                if (result.length == 3) {
-                    callback.messageReceived(result[2]);
-                }
-                break;
-            case ChatCommand.LOGIN:
-                callback.loggedIn();
-                break;
-
-            case ChatCommand.QUIT:
-                callback.loggedOut();
-                break;
+                case ChatCommand.BROADCAST:
+                    if (result.length == 3) {
+                        callback.messageReceived(result[2]);
+                    }
+                    break;
+                case ChatCommand.LOGIN:
+                    callback.loggedIn();
+                    break;
+                case ChatCommand.USERS:
+                    String users = result[2];
+                    System.out.println(users);
+                    break;
+                case ChatCommand.QUIT:
+                    callback.loggedOut();
+                    break;
             }
 
         } else {
@@ -71,5 +75,4 @@ public class SwingChatClientHandler extends IoHandlerAdapter {
     public void sessionClosed(IoSession session) throws Exception {
         callback.disconnected();
     }
-
 }

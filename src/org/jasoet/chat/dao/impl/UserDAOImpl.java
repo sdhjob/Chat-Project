@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jasoet.chat.dao.UserDAO;
 import org.jasoet.chat.model.User;
+import org.jasoet.chat.util.EncriptionUtil;
 
 public class UserDAOImpl implements UserDAO {
 
@@ -58,7 +59,7 @@ public class UserDAOImpl implements UserDAO {
         String sql = "INSERT INTO users (username,password) VALUES (?, ?);";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, d.getUsername());
-        ps.setString(2, d.getPassword());
+        ps.setString(2, EncriptionUtil.MD5MySQL(d.getPassword()));
         return ps.executeUpdate();
     }
 
@@ -73,7 +74,7 @@ public class UserDAOImpl implements UserDAO {
         String sql = "UPDATE users SET username=?,password=? WHERE id=?";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setString(1, newUser.getUsername());
-        ps.setString(2, newUser.getPassword());
+        ps.setString(2, EncriptionUtil.MD5MySQL(newUser.getPassword()));
         ps.setInt(3, id);
         return ps.executeUpdate();
     }

@@ -41,7 +41,7 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
             handler = new ChatProtocolHandler(this);
             acceptor.setHandler(handler);
             acceptor.bind(new InetSocketAddress(PORT));
-            messageReceived("Connected");
+            messageReceived("Server Connected");
             messageReceived("Listening on port " + PORT);
 
 
@@ -83,6 +83,7 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
         aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Chat Server");
 
         headerPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -214,16 +215,32 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
         connectMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         connectMenuItem.setMnemonic('C');
         connectMenuItem.setText("Connect");
+        connectMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                connectMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(connectMenuItem);
 
         disconnectMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         disconnectMenuItem.setMnemonic('D');
         disconnectMenuItem.setText("Disconnect");
+        disconnectMenuItem.setEnabled(false);
+        disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                disconnectMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(disconnectMenuItem);
 
         exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
         exitMenuItem.setMnemonic('x');
         exitMenuItem.setText("Exit");
+        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(exitMenuItem);
 
         mainMenubar.add(fileMenu);
@@ -258,6 +275,9 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
 
         connectButton.setEnabled(!acceptor.isActive());
         disconnectButton.setEnabled(acceptor.isActive());
+
+        connectMenuItem.setEnabled(!acceptor.isActive());
+        disconnectMenuItem.setEnabled(acceptor.isActive());
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
@@ -266,8 +286,25 @@ public class ServerFrame extends javax.swing.JFrame implements ServerCallback {
 
         connectButton.setEnabled(!acceptor.isActive());
         disconnectButton.setEnabled(acceptor.isActive());
+
+        connectMenuItem.setEnabled(!acceptor.isActive());
+        disconnectMenuItem.setEnabled(acceptor.isActive());
         messageReceived("Disconected");
     }//GEN-LAST:event_disconnectButtonActionPerformed
+
+    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
+        disconnectButtonActionPerformed(evt);
+        this.dispose();
+    }//GEN-LAST:event_exitMenuItemActionPerformed
+
+    private void connectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectMenuItemActionPerformed
+        connectButtonActionPerformed(evt);
+    }//GEN-LAST:event_connectMenuItemActionPerformed
+
+    private void disconnectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectMenuItemActionPerformed
+
+        disconnectButtonActionPerformed(evt);
+    }//GEN-LAST:event_disconnectMenuItemActionPerformed
 
     private static void addLogger(DefaultIoFilterChainBuilder chain)
             throws Exception {

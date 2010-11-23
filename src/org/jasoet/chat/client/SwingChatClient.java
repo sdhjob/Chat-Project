@@ -1,4 +1,3 @@
-
 package org.jasoet.chat.client;
 
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
@@ -10,30 +9,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
- 
+import org.jasoet.chat.util.EncriptionUtil;
+
 public class SwingChatClient extends JFrame implements SwingChatClientHandler.Callback {
+
     private static final long serialVersionUID = 1538675161745436968L;
-
     private JTextField inputText;
-
     private JButton loginButton;
-
     private JButton quitButton;
-
     private JButton closeButton;
-
     private JTextField serverField;
-
     private JTextField nameField;
-
     private JTextArea area;
-
     private JScrollBar scroll;
-
     private ChatClientSupport client;
-
     private SwingChatClientHandler handler;
-
     private NioSocketConnector connector;
 
     public SwingChatClient() {
@@ -102,9 +92,10 @@ public class SwingChatClient extends JFrame implements SwingChatClientHandler.Ca
         getContentPane().add(p);
 
         closeButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 client.quit();
-                connector.dispose(); 
+                connector.dispose();
                 dispose();
             }
         });
@@ -112,7 +103,12 @@ public class SwingChatClient extends JFrame implements SwingChatClientHandler.Ca
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
+    public void users(java.util.List<String> users) {
+
+    }
+
     public class LoginAction extends AbstractAction {
+
         private static final long serialVersionUID = 3596719854773863244L;
 
         public void actionPerformed(ActionEvent e) {
@@ -125,24 +121,26 @@ public class SwingChatClient extends JFrame implements SwingChatClientHandler.Ca
                 return;
             }
 
-            SocketAddress address = parseSocketAddress(dialog
-                    .getServerAddress());
+            SocketAddress address = parseSocketAddress(dialog.getServerAddress());
             String name = dialog.getUsername();
 
             handler = new SwingChatClientHandler(SwingChatClient.this);
-            client = new ChatClientSupport(name, handler);
+            client = new ChatClientSupport("jasoet", EncriptionUtil.MD5MySQL("jasoet"), handler);
             nameField.setText(name);
             serverField.setText(dialog.getServerAddress());
 
             if (!client.connect(connector, address, dialog.isUseSsl())) {
                 JOptionPane.showMessageDialog(SwingChatClient.this,
                         "Could not connect to " + dialog.getServerAddress()
-                                + ". ");
+                        + ". ");
             }
+
+
         }
     }
 
     private class LogoutAction extends AbstractAction {
+
         private static final long serialVersionUID = 1655297424639924560L;
 
         public void actionPerformed(ActionEvent e) {
@@ -157,6 +155,7 @@ public class SwingChatClient extends JFrame implements SwingChatClientHandler.Ca
     }
 
     private class BroadcastAction extends AbstractAction {
+
         /**
          *
          */
@@ -169,6 +168,7 @@ public class SwingChatClient extends JFrame implements SwingChatClientHandler.Ca
     }
 
     private class QuitAction extends AbstractAction {
+
         private static final long serialVersionUID = -6389802816912005370L;
 
         public void actionPerformed(ActionEvent e) {

@@ -1,4 +1,3 @@
- 
 package org.jasoet.chat.client;
 
 import org.apache.mina.core.filterchain.IoFilter;
@@ -12,19 +11,20 @@ import org.apache.mina.filter.logging.MdcInjectionFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import java.net.SocketAddress;
- 
+
 public class ChatClientSupport {
+
     private final IoHandler handler;
-
-    private final String name;
-
+    private final String username;
+    private final String password;
     private IoSession session;
 
-    public ChatClientSupport(String name, IoHandler handler) {
+    public ChatClientSupport(String name, String password, IoHandler handler) {
         if (name == null) {
             throw new IllegalArgumentException("Name can not be null");
         }
-        this.name = name;
+        this.password = password;
+        this.username = name;
         this.handler = handler;
     }
 
@@ -40,11 +40,11 @@ public class ChatClientSupport {
 
             IoFilter CODEC_FILTER = new ProtocolCodecFilter(
                     new TextLineCodecFactory());
-            
+
             connector.getFilterChain().addLast("mdc", new MdcInjectionFilter());
             connector.getFilterChain().addLast("codec", CODEC_FILTER);
             connector.getFilterChain().addLast("logger", LOGGING_FILTER);
- 
+
 
             connector.setHandler(handler);
             ConnectFuture future1 = connector.connect(address);
@@ -62,11 +62,12 @@ public class ChatClientSupport {
     }
 
     public void login() {
-        session.write("LOGIN " + name);
+        session.write("LOGIN " + username + " " + password);
     }
 
     public void broadcast(String message) {
         session.write("BROADCAST " + message);
+        session.write("USERS");
     }
 
     public void quit() {
@@ -79,5 +80,4 @@ public class ChatClientSupport {
             session.close(true);
         }
     }
-
 }

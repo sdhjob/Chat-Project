@@ -1,8 +1,5 @@
 package org.jasoet.chat.model;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import org.jasoet.chat.util.EncriptionUtil;
 
 public class User {
@@ -24,7 +21,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = EncriptionUtil.MD5MySQL(password);
+        this.password = password;
     }
 
     public String getUsername() {

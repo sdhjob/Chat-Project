@@ -3,8 +3,10 @@ Aplikasi Chatting menggunakan Java Swing dan Apache MINA
 Library yang digunakan pada aplikasi ini.
 1. Apache Mina (mina-core-2.0.1)
 2. Slf4j (slf4j-api-1.5.11, slf4j-log4j12-1.5.11)
-4. Log4j (log4j-1.2.14)
+3. Log4j (log4j-1.2.14)
+4. MySQL JDBC Driver
 
 [1] http://mina.apache.org
 [2] http://www.slf4j.org/
 [3] http://logging.apache.org/log4j/1.2/
+[4] Bundled with NetBeans
